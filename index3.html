@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            font-family: "Poppins", sans-serif;
+            font-weight: 100;
+            font-style: normal;
+        }
+
+        .box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+        }
+
+        .nav-box {
+            width: 100%;
+            height: 100px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px
+        }
+
+        #dateRange {
+            font-weight: bold;
+        }
+
+        .data-box {
+            width: 100%;
+            height: 600px;
+            overflow-x: auto;
+        }
+
+        .header,
+        .data {
+            width: min-content;
+            display: grid;
+            grid-template-columns: 60px 60px 60px;
+            gap: 1px;
+            background-color: #fff;
+
+        }
+
+        .header>div,
+        .data>div {
+            background-color: #fff;
+            padding: 10px 5px;
+            text-align: center;
+            font-size: 13px;
+            /* border-right: 1px solid black; */
+            /* border-bottom: 1px solid black; */
+        }
+
+        .header>div {
+            font-weight: bold;
+            background-color: #f5f5f5;
+        }
+
+        .header>div:nth-child(1),
+        .data>div:nth-child(1) {
+            position: sticky;
+            left: 0;
+            z-index: 30;
+            background-color: #f5f5f5;
+        }
+
+        .header>div:nth-child(2),
+        .data>div:nth-child(2) {
+            position: sticky;
+            left: 60px;
+            /* Adjust this to match the width of the first column */
+            z-index: 20;
+            background-color: #f5f5f5;
+        }
+
+        .header>div:nth-child(3),
+        .data>div:nth-child(3) {
+            position: sticky;
+            left: 120px;
+            /* Adjust this to match the combined width of the first two columns */
+            z-index: 10;
+            background-color: #f5f5f5;
+        }
+
+        .booking {
+            grid-column: span var(--span);
+            margin: 2px;
+            padding: 10px 20px;
+            border-radius: 3px;
+            font-size: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-weight: bold;
+            box-shadow: 1px 1px 10px #cecece;
+            white-space: nowrap;
+        }
+
+        .booking.new {
+            background-color: #ffa500;
+        }
+
+        .booking.confirmed {
+            background-color: #20b2aa;
+        }
+
+        .booking.arrived {
+            background-color: #4169e1;
+        }
+
+        .booking.checked-out {
+            background-color: #9370db;
+        }
+
+        .status-ready {
+            background-color: #90ee90;
+        }
+
+        .status-cleanup {
+            background-color: #add8e6;
+        }
+
+        .status-dirty {
+            background-color: #f08080;
+        }
+
+        .custom-tooltip {
+            display: none;
+            position: absolute;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            font-size: 12px;
+            line-height: 1.5;
+            font-weight: normal;
+        }
+
+        .booking:hover+.custom-tooltip {
+            display: block;
+        }
+
+        .active {
+            background-color: #4169e1;
+        }
+
+        .pagination-box {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination-box button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            background-color: white;
+            border: 1px solid #cecece;
+            border-radius: 5px;
+        }
+
+        .pagination-box button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .pagination-box button.active {
+            background-color: #4169e1;
+            color: white;
+        }
+
+
+
+        @media (max-width: 768px) {
+            .nav-box {
+                width: 100%;
+                height: auto;
+                display: flex;
+                flex-direction: column;
+                padding: 10px;
+                gap: 10px;
+                box-shadow: 1px 1px 10px #cecece;
+            }
+
+            .data-box {
+                width: 100%;
+                height: 600px;
+                border: 1px solid slateblue
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <div class="nav-box">
+            <select id="roomList"
+                style="padding: 5px 10px; border-radius: 5px; border: 1px solid #cecece; cursor: pointer;">
+                <option value="all">Show rooms: All</option>
+                <option value="1 bed">1 bed</option>
+                <option value="2 beds">2 beds</option>
+                <option value="3 beds">3 beds</option>
+                <option value="4 beds">4 beds</option>
+            </select>
+            <div id="dateRange">1 Mar 2024 - 31 Mar 2024</div>
+            <div>
+                <button id="prevMonth"
+                    style="cursor: pointer; background-color: white; border: 1px solid #cecece;border-radius: 5px; padding: 5px 10px;">&lt;</button>
+                <button id="today"
+                    style="cursor: pointer; background-color: white; border: 1px solid #cecece;border-radius: 5px; padding: 5px 10px;">TODAY</button>
+                <button id="nextMonth"
+                    style="cursor: pointer; background-color: white; border: 1px solid #cecece;border-radius: 5px; padding: 5px 10px;">
+                    &gt;</button>
+            </div>
+        </div>
+        <div class="data-box">
+            <div class="header" id="header" style="width: 100%;">
+                <!-- Header will be generated dynamically -->
+            </div>
+            <div class="data" id="bookingData" style="width: 100%;">
+                <!-- Booking data will be generated dynamically -->
+            </div>
+            <div id="tooltip" class="custom-tooltip"></div>
+        </div>
+        <div id="pagination" class="pagination-box">
+            <!-- Pagination will be generated dynamically -->
+        </div>
+    </div>
+</body>
+<script>
+    let currentDate = new Date(); // March 1, 2024
+    let filteredBeds = [];
+    const bedsPerPage = 10;
+    let currentPage = 1;
+
+
+    const beds = [
+        {
+            number: '101', type: '1 bed', status: 'Ready', bookings: [
+                { id: 'A-12', name: 'John Doe', start: '2024-07-02', end: '2024-07-23', status: 'New', paid: true }
+            ]
+        },
+        { number: '102', type: '1 bed', status: 'Clean up', bookings: [] },
+        {
+            number: '107', type: '1 bed', status: 'Dirty', bookings: [
+                { id: 'A-45', name: 'Jane Smith', start: '2024-07-07', end: '2024-07-21', status: 'Confirmed', paid: true }
+            ]
+        },
+        { number: '104', type: '1 bed', status: 'Ready', bookings: [] },
+        {
+            number: '105', type: '2 beds', status: 'Ready', bookings: [
+                { id: 'A-58', name: 'Bob Brown', start: '2024-07-05', end: '2024-07-14', status: 'Arrived', paid: true }
+            ]
+        },
+        { number: '201', type: '2 beds', status: 'Dirty', bookings: [] },
+        {
+            number: '202', type: '2 beds', status: 'Ready', bookings: [
+                { id: 'A-28', name: 'Bà Dung', start: '2024-07-04', end: '2024-07-18', status: 'Checked Out', paid: true },
+                { id: 'A-28', name: 'Bà Dung', start: '2024-04-04', end: '2024-04-07', status: 'Checked Out', paid: true },
+                { id: 'A-28', name: 'Bà Dung', start: '2024-05-04', end: '2024-05-07', status: 'Checked Out', paid: true },
+                { id: 'A-28', name: 'Bà Dung', start: '2024-06-04', end: '2024-06-10', status: 'Checked Out', paid: true },
+                { id: 'A-28', name: 'Bà Dung', start: '2024-07-05', end: '2024-07-09', status: 'Checked Out', paid: true },
+                { id: 'A-28', name: 'Bà Dung', start: '2024-08-18', end: '2024-08-22', status: 'Arrived', paid: true },
+                { id: 'A-28', name: 'Bà Dung', start: '2024-09-20', end: '2024-09-25', status: 'New', paid: true },
+                { id: 'A-28', name: 'Bà Dung', start: '2024-10-20', end: '2024-10-30', status: 'New', paid: true },
+            ]
+        },
+        {
+            number: '207', type: '3 beds', status: 'Clean up', bookings: [
+                { id: 'A-65', name: 'Bob Brown', start: '2024-07-31', end: '2024-04-07', status: 'Arrived', paid: true },
+            ]
+        },
+        {
+            number: '204', type: '3 beds', status: 'Clean up', bookings: [
+                { id: 'A-95', name: 'Bob Brown', start: '2024-07-30', end: '2024-04-07', status: 'Arrived', paid: true },
+            ]
+        },
+        {
+            number: '301', type: '4 beds', status: 'Dirty', bookings: [
+                { id: 'A-55', name: 'Bob Brown', start: '2024-07-05', end: '2024-07-07', status: 'Arrived', paid: true },
+            ]
+        },
+        { number: '302', type: '4 beds', status: 'Dirty', bookings: [] },
+        {
+            number: '401', type: '1 beds', status: 'Ready', bookings: [
+                { id: 'A-58', name: 'Bob Brown', start: '2024-07-05', end: '2024-07-11', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-07-05', end: '2024-07-14', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-04-05', end: '2024-04-14', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-05-05', end: '2024-05-14', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-06-06', end: '2024-06-10', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-07-07', end: '2024-07-09', status: 'Arrived', paid: true },
+            ]
+        },
+    ];
+
+    function getDaysInMonth(date) {
+        return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    }
+
+    function updateDateRange() {
+        const lastDay = getDaysInMonth(currentDate);
+        document.getElementById('dateRange').textContent =
+            `${currentDate.getDate()} ${currentDate.toLocaleString('default', { month: 'short' })} ${currentDate.getFullYear()} - 
+                ${lastDay} ${currentDate.toLocaleString('default', { month: 'short' })} ${currentDate.getFullYear()}`;
+    }
+
+    function generateDays() {
+        const header = document.getElementById('header');
+        header.innerHTML = '<div>Number</div><div>Type</div><div>Status</div>';
+        const daysInMonth = getDaysInMonth(currentDate);
+        for (let i = 1; i <= daysInMonth; i++) {
+            const day = document.createElement('div');
+            day.textContent = i.toString().padStart(2, '0');
+            header.appendChild(day);
+        }
+
+        // Update grid template columns
+        const gridTemplateColumns = `60px 60px 60px repeat(${daysInMonth}, minmax(30px, 1fr))`;
+        header.style.gridTemplateColumns = gridTemplateColumns;
+        document.getElementById('bookingData').style.gridTemplateColumns = gridTemplateColumns;
+
+    }
+
+    function getBookingsForMonth(bed, year, month) {
+        return bed.bookings.filter(booking => {
+            const bookingStart = new Date(booking.start);
+            const bookingEnd = new Date(booking.end);
+            const monthStart = new Date(year, month, 1);
+            const monthEnd = new Date(year, month + 1, 0);
+            return (bookingStart <= monthEnd && bookingEnd >= monthStart) ||
+                (bookingStart.getMonth() === month && bookingStart.getFullYear() === year) ||
+                (bookingEnd.getMonth() === month && bookingEnd.getFullYear() === year);
+        });
+    }
+
+    const tooltip = document.getElementById('tooltip');
+
+    function showTooltip(event, booking) {
+        tooltip.style.display = 'block';
+        tooltip.style.left = `${event.pageX + 10}px`;
+        tooltip.style.top = `${event.pageY + 10}px`;
+        tooltip.innerHTML = `
+        <strong>Id:</strong> ${booking.id}<br>
+        <strong>Name:</strong> ${booking.name}<br>
+        <strong>From:</strong> ${new Date(booking.start).getDate().toString().padStart(2, '0')} ${new Date(booking.start).toLocaleString('default', { month: 'short' })} ${new Date(booking.start).getFullYear()}<br>
+        <strong>To:</strong> ${new Date(booking.end).getDate().toString().padStart(2, '0')} ${new Date(booking.end).toLocaleString('default', { month: 'short' })} ${new Date(booking.end).getFullYear()}<br>
+        <strong>Status:</strong> ${booking.status}<br>
+        <strong>Paid:</strong> ${booking.paid ? 'Yes' : 'No'}
+    `;
+    }
+
+    function hideTooltip() {
+        tooltip.style.display = 'none';
+    }
+
+    function calculateStayDuration(start, end) {
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        const duration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+        return duration;
+    }
+
+    function generateBookings() {
+        const data = document.getElementById('bookingData');
+        data.innerHTML = '';
+
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const daysInMonth = getDaysInMonth(currentDate);
+
+        const startIndex = (currentPage - 1) * bedsPerPage;
+        const endIndex = startIndex + bedsPerPage;
+        const bedsToShow = filteredBeds.slice(startIndex, endIndex);
+
+        bedsToShow.forEach(bed => {
+            const row = document.createElement('div');
+            row.style.display = 'contents';
+            row.style.lineHeight = '30px';
+
+            const bedNumber = document.createElement('div');
+            bedNumber.textContent = bed.number;
+            bedNumber.classList.add('sticky-col');
+            bedNumber.style.position = 'sticky';
+            bedNumber.style.left = '0px';
+            bedNumber.style.zIndex = '30';
+            bedNumber.style.backgroundColor = 'white';
+            bedNumber.style.fontWeight = "normal"
+            bedNumber.style.display = "flex";
+            bedNumber.style.justifyContent = "center";
+            bedNumber.style.alignItems = "center";
+            row.appendChild(bedNumber);
+
+            const bedType = document.createElement('div');
+            bedType.textContent = bed.type;
+            bedType.classList.add('sticky-col');
+            bedType.style.position = 'sticky';
+            bedType.style.left = '60px';
+            bedType.style.zIndex = '20';
+            bedType.style.backgroundColor = 'white';
+            bedType.style.fontWeight = "normal";
+            bedType.style.display = "flex";
+            bedType.style.justifyContent = "center";
+            bedType.style.alignItems = "center";
+            row.appendChild(bedType);
+
+            const bedStatus = document.createElement('div');
+            bedStatus.className = `status-${bed.status.toLowerCase().replace(' ', '')}`;
+            bedStatus.classList.add('sticky-col');
+            bedStatus.style.position = 'sticky';
+            bedStatus.style.left = '120px';
+            bedStatus.style.zIndex = '10';
+            // bedStatus.style.backgroundColor = 'white';
+            bedStatus.style.fontWeight = "normal"
+            bedStatus.style.borderRight = "1px solid #ccc";
+            bedStatus.textContent = bed.status;
+            bedStatus.style.display = "flex";
+            bedStatus.style.justifyContent = "center";
+            bedStatus.style.alignItems = "center";
+            bedStatus.style.fontSize = "12px";
+
+            row.appendChild(bedStatus);
+
+            let occupiedDays = new Array(daysInMonth).fill(null);
+
+            const monthBookings = getBookingsForMonth(bed, year, month);
+            monthBookings.forEach(booking => {
+                const start = new Date(Math.max(new Date(year, month, 1), new Date(booking.start)));
+                const end = new Date(Math.min(new Date(year, month + 1, 0), new Date(booking.end)));
+
+                for (let day = start.getDate(); day <= end.getDate(); day++) {
+                    occupiedDays[day - 1] = booking;
+                }
+            });
+
+            let currentBooking = null;
+            let bookingStart = 0;
+
+            for (let i = 0; i < daysInMonth; i++) {
+                if (occupiedDays[i] !== currentBooking) {
+                    if (currentBooking) {
+                        const stayDuration = calculateStayDuration(currentBooking.start, currentBooking.end)
+                        const bookingElement = document.createElement('div');
+
+                        bookingElement.className = `booking ${currentBooking.status.toLowerCase().replace(' ', '-')}`;
+                        bookingElement.style.setProperty('--span', `${i - bookingStart}`);
+                        // bookingElement.style.height = '30px';
+                        // bookingElement.style.lineHeight = '30px';
+                        bookingElement.style.fontSize = '12px';
+                        bookingElement.innerHTML = `
+                                <span>${currentBooking.name}</span>
+                                <span>${stayDuration} days</span>
+                                <span>${currentBooking.status}</span>
+                                <span>${currentBooking.paid ? 'paid' : 'unpaid'}</span>
+                            `;
+
+                        (function (booking) {
+                            bookingElement.addEventListener('mouseover', (event) => showTooltip(event, booking));
+                            bookingElement.addEventListener('mouseout', hideTooltip);
+                        })(currentBooking);
+                        row.appendChild(bookingElement);
+                    } else if (i > bookingStart) {
+                        const emptyElement = document.createElement('div');
+                        emptyElement.style.gridColumn = `span ${i - bookingStart}`;
+                        emptyElement.style.height = '25px';
+                        row.appendChild(emptyElement);
+                    }
+                    currentBooking = occupiedDays[i];
+                    bookingStart = i;
+                }
+            }
+
+            if (currentBooking) {
+                const bookingElement = document.createElement('div');
+                const stayDuration = calculateStayDuration(currentBooking.start, currentBooking.end);
+                bookingElement.className = `booking ${currentBooking.status.toLowerCase().replace(' ', '-')}`;
+                bookingElement.style.setProperty('--span', `${daysInMonth - bookingStart}`);
+                bookingElement.style.height = '50px';
+                bookingElement.style.lineHeight = '30px';
+                bookingElement.style.fontSize = '12px';
+                bookingElement.innerHTML = `
+                        <span>${currentBooking.name}</span>
+                        <span>${stayDuration} days</span>
+                        <span>${currentBooking.status}</span>
+                        <span>${currentBooking.paid ? 'paid' : 'unpaid'}</span>
+                    `;
+                row.appendChild(bookingElement);
+            } else if (bookingStart < daysInMonth) {
+                const emptyElement = document.createElement('div');
+                emptyElement.style.gridColumn = `span ${daysInMonth - bookingStart}`;
+                emptyElement.style.height = '30px';
+                row.appendChild(emptyElement);
+            }
+
+
+
+            data.appendChild(row);
+        });
+    }
+
+    function filterBeds() {
+        const selectedType = document.getElementById('roomList').value;
+        filteredBeds = selectedType === 'all' ? beds : beds.filter(bed => bed.type === selectedType);
+        console.log("🚀 ~ filterBeds ~ filterBeds:", filteredBeds)
+        currentPage = 1;
+    }
+
+    function generatePagination() {
+        const totalPages = Math.ceil(filteredBeds.length / bedsPerPage);
+        console.log("🚀 ~ generatePagination ~ totalPages:", totalPages)
+        const paginationElement = document.getElementById('pagination');
+        paginationElement.innerHTML = '';
+        for (let i = 0; i < totalPages; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.textContent = i + 1;
+            pageButton.dataset.page = i + 1;
+            pageButton.addEventListener('click', () => {
+                currentPage = i + 1;
+                generateBookings();
+                updatePaginationActiveClass();
+            });
+            paginationElement.appendChild(pageButton);
+        }
+        updatePaginationActiveClass();
+    }
+
+    function updatePaginationActiveClass() {
+        const paginationElement = document.getElementById('pagination');
+        const buttons = paginationElement.getElementsByTagName('button');
+
+        for (let button of buttons) {
+            if (parseInt(button.dataset.page) === currentPage) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+        }
+    }
+
+    function updateCalendar() {
+        updateDateRange();
+        generateDays();
+        filterBeds();
+        generatePagination();
+        generateBookings();
+        updatePaginationActiveClass();
+    }
+
+
+    document.getElementById('prevMonth').addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        updateCalendar();
+    });
+
+    document.getElementById('nextMonth').addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        updateCalendar();
+    });
+
+    document.getElementById('today').addEventListener('click', () => {
+        currentDate = new Date();
+        updateCalendar();
+    });
+
+    // Modify the event listener for room type selection
+    document.getElementById('roomList').addEventListener('change', (e) => {
+        console.log('Selected room type:', e.target.value);
+        updateCalendar();
+    });
+
+    updateCalendar();
+</script>
+
+</html>

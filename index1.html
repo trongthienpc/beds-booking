@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Bed Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .container {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        .header,
+        .data {
+            display: grid;
+            grid-template-columns: 100px 100px 100px repeat(31, minmax(40px, 1fr));
+            gap: 1px;
+            background-color: #ccc;
+        }
+
+        .header>div,
+        .data>div {
+            background-color: #fff;
+            padding: 5px;
+            text-align: center;
+            border-right: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
+            min-width: 40px;
+        }
+
+        .header>div:nth-child(-n+3),
+        .data>div:nth-child(-n+3) {
+            position: sticky;
+            left: 0;
+            z-index: 1;
+            background-color: #f0f0f0;
+        }
+
+        .header>div:nth-child(3),
+        .data>div:nth-child(3) {
+            border-right: 2px solid #999;
+        }
+
+        .booking {
+            background-color: #ffa500 !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #dateRange {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <div class="nav">
+            <select id="roomList">
+                <option value="all">All rooms</option>
+                <option value="1bed">1 bed</option>
+                <option value="2beds">2 beds</option>
+                <option value="3beds">3 beds</option>
+                <option value="4beds">4 beds</option>
+            </select>
+            <div id="dateRange">1 Mar 2020 - 31 Mar 2020</div>
+            <div>
+                <button id="prevMonth">&lt;</button>
+                <button id="today">TODAY</button>
+                <button id="nextMonth">&gt;</button>
+            </div>
+        </div>
+        <div class="container">
+            <div class="header" id="header">
+                <!-- Header will be generated dynamically -->
+            </div>
+
+            <div class="data" id="bookingData">
+                <!-- Booking data will be generated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date(2020, 2, 1); // March 1, 2020
+
+        const beds = [
+            {
+                number: '101',
+                type: '1 bed',
+                status: 'Ready',
+                bookings: [
+                    { name: 'John Doe', start: '2020-03-05', end: '2020-03-10' },
+                    { name: 'Jane Smith', start: '2020-03-15', end: '2020-03-20' }
+                ]
+            },
+            {
+                number: '102',
+                type: '1 bed',
+                status: 'Clean up',
+                bookings: [
+                    { name: 'Alice Johnson', start: '2020-03-01', end: '2020-03-07' },
+                    { name: 'Bob Brown', start: '2020-03-20', end: '2020-03-25' }
+                ]
+            },
+            {
+                number: '201',
+                type: '2 beds',
+                status: 'Ready',
+                bookings: [
+                    { name: 'Charlie Davis', start: '2020-03-08', end: '2020-03-18' }
+                ]
+            },
+            {
+                number: '301',
+                type: '3 beds',
+                status: 'Dirty',
+                bookings: [
+                    { name: 'David Wilson', start: '2020-02-28', end: '2020-03-03' },
+                    { name: 'Eva Martinez', start: '2020-03-25', end: '2020-04-02' }
+                ]
+            }
+        ];
+
+        function getDaysInMonth(date) {
+            return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        }
+
+        function updateDateRange() {
+            const lastDay = getDaysInMonth(currentDate);
+            document.getElementById('dateRange').textContent =
+                `${currentDate.getDate()} ${currentDate.toLocaleString('default', { month: 'short' })} ${currentDate.getFullYear()} - 
+        ${lastDay} ${currentDate.toLocaleString('default', { month: 'short' })} ${currentDate.getFullYear()}`;
+        }
+
+        function generateDays() {
+            const header = document.getElementById('header');
+            header.innerHTML = '<div>Number</div><div>Type</div><div>Status</div>';
+            const daysInMonth = getDaysInMonth(currentDate);
+            for (let i = 1; i <= daysInMonth; i++) {
+                const day = document.createElement('div');
+                day.textContent = i;
+                header.appendChild(day);
+            }
+
+            // Update grid template columns
+            const gridTemplateColumns = `100px 100px 100px repeat(${daysInMonth}, minmax(40px, 1fr))`;
+            header.style.gridTemplateColumns = gridTemplateColumns;
+            document.getElementById('bookingData').style.gridTemplateColumns = gridTemplateColumns;
+
+            // Update container width
+            const containerWidth = 300 + (daysInMonth * 40); // 300px for fixed columns, 40px for each day
+            document.querySelector('.container').style.width = `${containerWidth}px`;
+        }
+
+        function getBookingsForMonth(bed, year, month) {
+            return bed.bookings.filter(booking => {
+                const bookingStart = new Date(booking.start);
+                const bookingEnd = new Date(booking.end);
+                const monthStart = new Date(year, month, 1);
+                const monthEnd = new Date(year, month + 1, 0);
+                return bookingStart <= monthEnd && bookingEnd >= monthStart;
+            });
+        }
+
+        function generateBookings() {
+            const data = document.getElementById('bookingData');
+            data.innerHTML = ''; // Clear existing data
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const daysInMonth = getDaysInMonth(currentDate);
+
+            beds.forEach(bed => {
+                const row = document.createElement('div');
+                row.style.display = 'contents';
+
+                const bedNumber = document.createElement('div');
+                bedNumber.textContent = bed.number;
+                row.appendChild(bedNumber);
+
+                const bedType = document.createElement('div');
+                bedType.textContent = bed.type;
+                row.appendChild(bedType);
+
+                const bedStatus = document.createElement('div');
+                bedStatus.textContent = bed.status;
+                row.appendChild(bedStatus);
+
+                let occupiedDays = new Array(daysInMonth).fill(null);
+
+                const monthBookings = getBookingsForMonth(bed, year, month);
+                monthBookings.forEach(booking => {
+                    const start = new Date(Math.max(new Date(year, month, 1), new Date(booking.start)));
+                    const end = new Date(Math.min(new Date(year, month + 1, 0), new Date(booking.end)));
+
+                    for (let day = start.getDate(); day <= end.getDate(); day++) {
+                        occupiedDays[day - 1] = booking;
+                    }
+                });
+
+                let currentBooking = null;
+                let bookingStart = 0;
+
+                for (let i = 0; i < daysInMonth; i++) {
+                    if (occupiedDays[i] !== currentBooking) {
+                        if (currentBooking) {
+                            const bookingElement = document.createElement('div');
+                            bookingElement.className = 'booking';
+                            bookingElement.textContent = `${currentBooking.name} ${bookingStart + 1}/${month + 1} - ${i}/${month + 1}`;
+                            bookingElement.style.gridColumn = `span ${i - bookingStart}`;
+                            row.appendChild(bookingElement);
+                        } else if (i > bookingStart) {
+                            const emptyElement = document.createElement('div');
+                            emptyElement.style.gridColumn = `span ${i - bookingStart}`;
+                            row.appendChild(emptyElement);
+                        }
+                        currentBooking = occupiedDays[i];
+                        bookingStart = i;
+                    }
+                }
+
+                if (currentBooking) {
+                    const bookingElement = document.createElement('div');
+                    bookingElement.className = 'booking';
+                    bookingElement.textContent = `${currentBooking.name} ${bookingStart + 1}/${month + 1} - ${daysInMonth}/${month + 1}`;
+                    bookingElement.style.gridColumn = `span ${daysInMonth - bookingStart}`;
+                    row.appendChild(bookingElement);
+                } else if (bookingStart < daysInMonth) {
+                    const emptyElement = document.createElement('div');
+                    emptyElement.style.gridColumn = `span ${daysInMonth - bookingStart}`;
+                    row.appendChild(emptyElement);
+                }
+
+                data.appendChild(row);
+            });
+        }
+
+        function updateCalendar() {
+            updateDateRange();
+            generateDays();
+            generateBookings();
+        }
+
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            updateCalendar();
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            updateCalendar();
+        });
+
+        document.getElementById('today').addEventListener('click', () => {
+            currentDate = new Date();
+            updateCalendar();
+        });
+
+        document.getElementById('roomList').addEventListener('change', (e) => {
+            console.log('Selected room type:', e.target.value);
+            // Implement filtering logic here
+        });
+
+        updateCalendar();
+    </script>
+</body>
+
+</html>

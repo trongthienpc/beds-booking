@@ -1,0 +1,71 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #f4f4f4;
+    border-bottom: 1px solid #ccc;
+}
+
+header {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid #ccc;
+}
+
+.header-row {
+    display: flex;
+}
+
+.header-cell {
+    padding: 10px;
+    border-right: 1px solid #ccc;
+    text-align: center;
+}
+
+.month {
+    flex: 1;
+}
+
+#data {
+    display: flex;
+    flex-direction: column;
+}
+
+.data-row {
+    display: flex;
+    margin: 5px 0;
+}
+
+.data-cell {
+    padding: 10px;
+    border-right: 1px solid #ccc;
+    text-align: center;
+}
+
+.data-cell.booking {
+    color: white;
+}
+
+.data-cell.new {
+    background-color: orange;
+}
+
+.data-cell.confirmed {
+    background-color: green;
+}
+
+.data-cell.arrived {
+    background-color: blue;
+}
+
+.data-cell.checked-out {
+    background-color: purple;
+}
+
+/* Add more styles as needed */

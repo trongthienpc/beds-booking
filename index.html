@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Bed Booking Management</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <nav>
+        <div>
+            <label for="room-select">Show rooms:</label>
+            <select id="room-select">
+                <option value="all">All</option>
+                <!-- Add more options as needed -->
+            </select>
+        </div>
+        <div>
+            <button id="prev-month">&lt;</button>
+            <span id="current-month">March 2020</span>
+            <button id="next-month">&gt;</button>
+            <button id="today">Today</button>
+        </div>
+    </nav>
+    <header>
+        <div class="header-row">
+            <div class="header-cell">Number</div>
+            <div class="header-cell">Type</div>
+            <div class="header-cell">Status</div>
+            <div class="header-cell month" colspan="31">March 2020</div>
+        </div>
+        <div class="header-row" id="days-header">
+            <div class="header-cell"></div>
+            <div class="header-cell"></div>
+            <div class="header-cell"></div>
+            <!-- Generate day headers dynamically with JavaScript -->
+        </div>
+    </header>
+    <div id="data">
+        <!-- Generate bed booking data dynamically with JavaScript -->
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+
+</html>
