@@ -312,6 +312,78 @@
         },
     ];
 
+    function generateRandomBeds(count, bookingRate = 0.7) {
+        const bedTypes = ['1 bed', '2 beds', '3 beds', '4 beds'];
+        const statuses = ['Ready', 'Clean up', 'Dirty'];
+        const bookingStatuses = ['New', 'Confirmed', 'Arrived', 'Checked Out'];
+        const names = ['John Doe', 'Jane Smith', 'Bob Brown', 'Bà Dung', 'Alice Johnson', 'Charlie Davis'];
+
+        function randomDate(start, end) {
+            return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+        }
+
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function isOverlapping(bookings, newBooking) {
+            return bookings.some(booking => {
+                const bookingStart = new Date(booking.start);
+                const bookingEnd = new Date(booking.end);
+                const newStart = new Date(newBooking.start);
+                const newEnd = new Date(newBooking.end);
+                return (newStart < bookingEnd && newEnd > bookingStart);
+            });
+        }
+
+        const beds = [];
+
+        for (let i = 1; i <= count; i++) {
+            const bedNumber = i.toString().padStart(3, '0');
+            const bedType = bedTypes[Math.floor(Math.random() * bedTypes.length)];
+            const status = statuses[Math.floor(Math.random() * statuses.length)];
+
+            let bookings = [];
+
+            if (Math.random() < bookingRate) {
+                const maxAttempts = 10; // Số lần tối đa thử tạo booking không chồng chéo
+                let attempts = 0;
+
+                while (bookings.length < 4 && attempts < maxAttempts) {
+                    const startDate = randomDate(new Date(2024, 0, 1), new Date(2024, 11, 31));
+                    const endDate = new Date(startDate.getTime() + Math.random() * 14 * 24 * 60 * 60 * 1000);
+
+                    const newBooking = {
+                        id: `A-${Math.floor(Math.random() * 100)}`,
+                        name: names[Math.floor(Math.random() * names.length)],
+                        start: formatDate(startDate),
+                        end: formatDate(endDate),
+                        status: bookingStatuses[Math.floor(Math.random() * bookingStatuses.length)],
+                        paid: Math.random() < 0.9
+                    };
+
+                    if (!isOverlapping(bookings, newBooking)) {
+                        bookings.push(newBooking);
+                        attempts = 0; // Reset attempts after successful booking
+                    } else {
+                        attempts++;
+                    }
+                }
+            }
+
+            beds.push({
+                number: bedNumber,
+                type: bedType,
+                status: status,
+                bookings: bookings
+            });
+        }
+
+        return beds;
+    }
+
+    const randomBeds = generateRandomBeds(200, 0.8);
+
     function getDaysInMonth(date) {
         return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
     }
@@ -356,8 +428,27 @@
 
     function showTooltip(event, booking) {
         tooltip.style.display = 'block';
-        tooltip.style.left = `${event.pageX + 10}px`;
-        tooltip.style.top = `${event.pageY + 10}px`;
+
+        const tooltipPadding = 10;
+        const tooltipWidth = tooltip.offsetWidth;
+        const tooltipHeight = tooltip.offsetHeight;
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        let left = event.pageX + tooltipPadding;
+        let top = event.pageY + tooltipPadding;
+
+        if (left + tooltipWidth > windowWidth) {
+            left = event.pageX - tooltipWidth - tooltipPadding;
+        }
+
+        if (top + tooltipHeight > windowHeight) {
+            top = event.pageY - tooltipHeight - tooltipPadding;
+        }
+
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+
         tooltip.innerHTML = `
         <strong>Id:</strong> ${booking.id}<br>
         <strong>Name:</strong> ${booking.name}<br>
@@ -367,7 +458,6 @@
         <strong>Paid:</strong> ${booking.paid ? 'Yes' : 'No'}
     `;
     }
-
     function hideTooltip() {
         tooltip.style.display = 'none';
     }
@@ -502,6 +592,10 @@
                         <span>${currentBooking.status}</span>
                         <span>${currentBooking.paid ? 'paid' : 'unpaid'}</span>
                     `;
+                (function (booking) {
+                    bookingElement.addEventListener('mouseover', (event) => showTooltip(event, booking));
+                    bookingElement.addEventListener('mouseout', hideTooltip);
+                })(currentBooking);
                 row.appendChild(bookingElement);
             } else if (bookingStart < daysInMonth) {
                 const emptyElement = document.createElement('div');
@@ -518,7 +612,7 @@
 
     function filterBeds() {
         const selectedType = document.getElementById('roomList').value;
-        filteredBeds = selectedType === 'all' ? beds : beds.filter(bed => bed.type === selectedType);
+        filteredBeds = selectedType === 'all' ? randomBeds : randomBeds.filter(bed => bed.type === selectedType);
         console.log("🚀 ~ filterBeds ~ filterBeds:", filteredBeds)
         currentPage = 1;
     }

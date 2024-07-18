@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Bed Occupancy</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .chart {
+            margin-bottom: 20px;
+        }
+
+        .bar {
+            stroke: white;
+            stroke-width: 1;
+        }
+
+        .percentage {
+            font-size: 10px;
+            fill: black;
+        }
+
+        .chart-title {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="charts"></div>
+
+    <script>
+        const totalBeds = 275;
+        const chartsCount = 10;
+        const bedsPerChart = Math.ceil(totalBeds / chartsCount);
+
+        function generateRandomData(bedCount) {
+            return Array.from({ length: bedCount }, (_, i) => {
+                const occupied = Math.random();
+                const available = Math.random() * (1 - occupied);
+                return {
+                    bedNumber: i + 1,
+                    occupied: occupied,
+                    available: available,
+                    total: occupied + available
+                };
+            });
+        }
+
+        function createChart(data, chartIndex) {
+            const margin = { top: 40, right: 20, bottom: 30, left: 40 };
+            const width = 800 - margin.left - margin.right;
+            const height = 300 - margin.top - margin.bottom;
+
+            const svg = d3.select("#charts")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .attr("margin", 10)
+                .attr("padding", 14)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleBand()
+                .range([0, width])
+                .padding(0.1);
+
+            const y = d3.scaleLinear()
+                .range([height, 0]);
+
+            x.domain(data.map(d => d.bedNumber));
+            y.domain([0, 1]);
+
+            svg.selectAll(".bar-occupied")
+                .data(data)
+                .enter().append("rect")
+                .attr("class", "bar occupied")
+                .attr("x", d => x(d.bedNumber))
+                .attr("width", x.bandwidth())
+                .attr("y", d => y(d.occupied))
+                .attr("height", d => height - y(d.occupied))
+                .attr("fill", "#ff9999");
+
+            svg.selectAll(".bar-available")
+                .data(data)
+                .enter().append("rect")
+                .attr("class", "bar available")
+                .attr("x", d => x(d.bedNumber))
+                .attr("width", x.bandwidth())
+                .attr("y", d => y(d.occupied + d.available))
+                .attr("height", d => height - y(d.available))
+                .attr("fill", "#66b3ff");
+
+            // Add percentage labels
+            svg.selectAll(".percentage")
+                .data(data)
+                .enter().append("text")
+                .attr("class", "percentage")
+                .attr("x", d => x(d.bedNumber) + x.bandwidth() / 2)
+                .attr("y", d => y(d.total) - 5)
+                .attr("text-anchor", "middle")
+                .text(d => `${(d.total * 100).toFixed(0)}%`);
+
+            svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x).tickValues(x.domain().filter((d, i) => !(i % 5))))
+                .selectAll("text")
+                .style("text-anchor", "end")
+                .attr("dx", "-.8em")
+                .attr("dy", ".15em")
+                .attr("transform", "rotate(-65)");
+
+            svg.append("g")
+                .call(d3.axisLeft(y).ticks(5).tickFormat(d3.format(".0%")));
+
+            svg.append("rect")
+                .attr("x", width / 2 - 100)
+                .attr("y", -margin.top + 10)
+                .attr("width", 200)
+                .attr("height", 24)
+                .attr("fill", "white")
+                .attr("opacity", 0.8);
+
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", -margin.top + 25)
+                .attr("class", "chart-title")
+                .attr("text-anchor", "middle")
+                .style("font-size", "16px")
+                .style("padding", "10px")
+                .text(`Beds ${chartIndex * bedsPerChart + 1} - ${Math.min((chartIndex + 1) * bedsPerChart, totalBeds)}`);
+        }
+
+        for (let i = 0; i < chartsCount; i++) {
+            const chartData = generateRandomData(Math.min(bedsPerChart, totalBeds - i * bedsPerChart));
+            createChart(chartData, i);
+        }
+    </script>
+</body>
+
+</html>

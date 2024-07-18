@@ -1,0 +1,35 @@
+1. Tỷ lệ sử dụng giường bệnh:
+Công thức: (Số ngày giường được sử dụng / Tổng số ngày giường có sẵn) x 100%
+Ví dụ: Nếu bệnh viện có 100 giường, trong 30 ngày có 2700 ngày giường được sử dụng:
+(2700 / (100 x 30)) x 100% = 90%
+Đây là chỉ số quan trọng nhất vì nó phản ánh hiệu quả sử dụng tài sản của bệnh viện.
+2. Doanh thu trên mỗi ngày giường:
+Công thức: Tổng doanh thu / Tổng số ngày giường được sử dụng
+Ví dụ: Nếu doanh thu là 1,000,000,000 đồng và có 2700 ngày giường được sử dụng:
+1,000,000,000 / 2700 = 370,370 đồng/ngày giường
+Chỉ số này cho biết khả năng tạo ra doanh thu từ việc sử dụng giường bệnh.
+3. Chi phí trên mỗi ngày giường:
+Công thức: Tổng chi phí vận hành / Tổng số ngày giường được sử dụng
+Ví dụ: Nếu tổng chi phí là 800,000,000 đồng và có 2700 ngày giường được sử dụng:
+800,000,000 / 2700 = 296,296 đồng/ngày giường
+Chỉ số này giúp đánh giá hiệu quả quản lý chi phí.
+4. Tỷ suất lợi nhuận trên mỗi ngày giường:
+Công thức: (Doanh thu trên mỗi ngày giường - Chi phí trên mỗi ngày giường) / Doanh thu trên mỗi ngày giường
+Sử dụng số liệu từ ví dụ trước:
+(370,370 - 296,296) / 370,370 = 20%
+Chỉ số này cho biết hiệu quả sinh lời từ hoạt động kinh doanh cốt lõi.
+5. Thời gian nằm viện trung bình:
+Công thức: Tổng số ngày nằm viện của tất cả bệnh nhân / Số lượng bệnh nhân xuất viện
+Ví dụ: Nếu có 2700 ngày nằm viện và 300 bệnh nhân xuất viện:
+2700 / 300 = 9 ngày
+Chỉ số này phản ánh hiệu quả điều trị và quản lý bệnh nhân.
+6. Doanh thu trên mỗi giường bệnh:
+Công thức: Tổng doanh thu / Số lượng giường bệnh
+Ví dụ: Nếu doanh thu là 1,000,000,000 đồng và có 100 giường:
+1,000,000,000 / 100 = 10,000,000 đồng/giường
+Chỉ số này đánh giá hiệu suất tạo doanh thu của cơ sở vật chất.
+7. Chi phí trên mỗi giường bệnh:
+Công thức: Tổng chi phí vận hành / Số lượng giường bệnh
+Ví dụ: Nếu tổng chi phí là 800,000,000 đồng và có 100 giường:
+800,000,000 / 100 = 8,000,000 đồng/giường
+Chỉ số này giúp đánh giá hiệu quả quản lý chi phí trên cơ sở vật chất.

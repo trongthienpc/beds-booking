@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body style="overflow-y: scroll; height: 100vh;">
+    <div id="chartdiv"></div>
+</body>
+<!-- Styles -->
+<style>
+    #chartdiv {
+        width: 100%;
+        min-height: 500px;
+        height: 800px;
+    }
+</style>
+
+<!-- Resources -->
+<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+
+<!-- Chart code -->
+<script>
+    function generateRandomBeds(count, bookingRate = 0.7) {
+        const bedTypes = ['1 bed', '2 beds', '3 beds', '4 beds'];
+        const statuses = ['Ready', 'Clean up', 'Dirty'];
+        const bookingStatuses = ['New', 'Confirmed', 'Arrived', 'Checked Out'];
+        const names = ['John Doe', 'Jane Smith', 'Bob Brown', 'Bà Dung', 'Alice Johnson', 'Charlie Davis'];
+
+        function randomDate(start, end) {
+            return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+        }
+
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function isOverlapping(bookings, newBooking) {
+            return bookings.some(booking => {
+                const bookingStart = new Date(booking.start);
+                const bookingEnd = new Date(booking.end);
+                const newStart = new Date(newBooking.start);
+                const newEnd = new Date(newBooking.end);
+                return (newStart < bookingEnd && newEnd > bookingStart);
+            });
+        }
+
+        const beds = [];
+
+        for (let i = 1; i <= count; i++) {
+            const bedNumber = i.toString().padStart(3, '0');
+            const bedType = bedTypes[Math.floor(Math.random() * bedTypes.length)];
+            const status = statuses[Math.floor(Math.random() * statuses.length)];
+
+            let bookings = [];
+
+            if (Math.random() < bookingRate) {
+                const maxAttempts = 10; // Số lần tối đa thử tạo booking không chồng chéo
+                let attempts = 0;
+
+                while (bookings.length < 4 && attempts < maxAttempts) {
+                    const startDate = randomDate(new Date(2024, 0, 1), new Date(2024, 11, 31));
+                    const endDate = new Date(startDate.getTime() + Math.random() * 14 * 24 * 60 * 60 * 1000);
+
+                    const newBooking = {
+                        id: `A-${Math.floor(Math.random() * 100)}`,
+                        name: names[Math.floor(Math.random() * names.length)],
+                        start: formatDate(startDate),
+                        end: formatDate(endDate),
+                        status: bookingStatuses[Math.floor(Math.random() * bookingStatuses.length)],
+                        paid: Math.random() < 0.9
+                    };
+
+                    if (!isOverlapping(bookings, newBooking)) {
+                        bookings.push(newBooking);
+                        attempts = 0; // Reset attempts after successful booking
+                    } else {
+                        attempts++;
+                    }
+                }
+            }
+
+            beds.push({
+                number: bedNumber,
+                type: bedType,
+                status: status,
+                bookings: bookings
+            });
+        }
+
+        return beds;
+    }
+
+    const randomBeds = generateRandomBeds(200, 0.8);
+    console.log("🚀 ~ randomBeds:", randomBeds)
+
+    const beds = [
+        {
+            number: '101', type: '1 bed', status: 'Ready', bookings: [
+                { id: 'A-12', name: 'John Doe', start: '2024-07-02', end: '2024-07-23', status: 'New', paid: true }
+            ]
+        },
+        { number: '102', type: '1 bed', status: 'Clean up', bookings: [] },
+        {
+            number: '107', type: '1 bed', status: 'Dirty', bookings: [
+                { id: 'A-45', name: 'Jane Smith', start: '2024-07-07', end: '2024-07-21', status: 'Confirmed', paid: true }
+            ]
+        },
+        { number: '104', type: '1 bed', status: 'Ready', bookings: [] },
+        {
+            number: '105', type: '2 beds', status: 'Ready', bookings: [
+                { id: 'A-58', name: 'Bob Brown', start: '2024-07-05', end: '2024-07-14', status: 'Arrived', paid: true }
+            ]
+        },
+        { number: '201', type: '2 beds', status: 'Dirty', bookings: [] },
+        {
+            number: '202', type: '2 beds', status: 'Ready', bookings: [
+                { id: 'A-28', name: 'Bà Dung', start: '2024-07-04', end: '2024-07-18', status: 'Checked Out', paid: true },
+                { id: 'A-28', name: 'Bà Dung', start: '2024-04-04', end: '2024-04-07', status: 'Checked Out', paid: true },
+                { id: 'A-28', name: 'Bà Dung', start: '2024-05-04', end: '2024-05-07', status: 'Checked Out', paid: true },
+                { id: 'A-28', name: 'Bà Dung', start: '2024-06-04', end: '2024-06-10', status: 'Checked Out', paid: true },
+                { id: 'A-28', name: 'Bà Dung', start: '2024-07-05', end: '2024-07-09', status: 'Checked Out', paid: true },
+                { id: 'A-28', name: 'Bà Dung', start: '2024-08-18', end: '2024-08-22', status: 'Arrived', paid: true },
+                { id: 'A-28', name: 'Bà Dung', start: '2024-09-20', end: '2024-09-25', status: 'New', paid: true },
+                { id: 'A-28', name: 'Bà Dung', start: '2024-10-20', end: '2024-10-30', status: 'New', paid: true },
+            ]
+        },
+        {
+            number: '207', type: '3 beds', status: 'Clean up', bookings: [
+                { id: 'A-65', name: 'Bob Brown', start: '2024-07-31', end: '2024-04-07', status: 'Arrived', paid: true },
+            ]
+        },
+        {
+            number: '204', type: '3 beds', status: 'Clean up', bookings: [
+                { id: 'A-95', name: 'Bob Brown', start: '2024-07-30', end: '2024-04-07', status: 'Arrived', paid: true },
+            ]
+        },
+        {
+            number: '301', type: '4 beds', status: 'Dirty', bookings: [
+                { id: 'A-55', name: 'Bob Brown', start: '2024-07-05', end: '2024-07-07', status: 'Arrived', paid: true },
+            ]
+        },
+        { number: '302', type: '4 beds', status: 'Dirty', bookings: [] },
+        {
+            number: '401', type: '1 beds', status: 'Ready', bookings: [
+                { id: 'A-58', name: 'Bob Brown', start: '2024-07-05', end: '2024-07-11', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-07-05', end: '2024-07-14', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-04-05', end: '2024-04-14', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-05-05', end: '2024-05-14', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-06-06', end: '2024-06-10', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-07-07', end: '2024-07-09', status: 'Arrived', paid: true },
+            ]
+        },
+        {
+            number: '402', type: '1 beds', status: 'Ready', bookings: [
+                { id: 'A-58', name: 'Bob Brown', start: '2024-07-05', end: '2024-07-11', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-07-05', end: '2024-07-14', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-04-05', end: '2024-04-14', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-05-05', end: '2024-05-14', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-06-06', end: '2024-06-10', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-07-07', end: '2024-07-09', status: 'Arrived', paid: true },
+            ]
+        },
+        {
+            number: '403', type: '1 beds', status: 'Ready', bookings: [
+                { id: 'A-58', name: 'Bob Brown', start: '2024-07-06', end: '2024-07-11', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-07-07', end: '2024-07-14', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-04-08', end: '2024-04-14', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-05-09', end: '2024-05-14', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-06-08', end: '2024-06-10', status: 'Arrived', paid: true },
+                { id: 'A-58', name: 'Bob Brown', start: '2024-07-07', end: '2024-07-09', status: 'Arrived', paid: true },
+            ]
+        },
+    ];
+
+    const calculateOccupancyRate = (bookings, year, month) => {
+        const daysInMonth = new Date(year, month, 0).getDate();
+        let occupiedDays = 0;
+
+        bookings.forEach(booking => {
+            const start = new Date(booking.start);
+            const end = new Date(booking.end);
+
+            if (start.getFullYear() === year && start.getMonth() + 1 === month) {
+                const startDay = start.getDate();
+                const endDay = end.getMonth() + 1 === month ? end.getDate() : daysInMonth;
+                occupiedDays += endDay - startDay + 1;
+            }
+        });
+
+        return (occupiedDays / daysInMonth) * 100;
+    };
+
+    const transformedData = randomBeds.map(bed => {
+        const occupancyRate = calculateOccupancyRate(bed.bookings, 2024, 7);
+        return {
+            bedNo: bed.number,
+            occupied: parseFloat(occupancyRate.toFixed(1))
+        };
+    });
+    console.log("🚀 ~ transformedData ~ transformedData:", transformedData)
+
+
+
+    am5.ready(function () {
+
+        // Create root element
+        // https://www.amcharts.com/docs/v5/getting-started/#Root_element
+        var root = am5.Root.new("chartdiv");
+
+
+        // Set themes
+        // https://www.amcharts.com/docs/v5/concepts/themes/
+        root.setThemes([
+            am5themes_Animated.new(root)
+        ]);
+
+
+        // Create chart
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/
+        var chart = root.container.children.push(am5xy.XYChart.new(root, {
+            panX: false,
+            panY: false,
+            wheelX: "none",
+            wheelY: "none",
+            paddingLeft: 0,
+            layout: root.verticalLayout,
+            height: am5.percent(100 + randomBeds.length * 2)
+            // paddingRight: 40
+        }));
+
+        // We don't want zoom-out button to appear while animating, so we hide it
+        chart.zoomOutButton.set("forceHidden", true);
+
+        // Create axes
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+        var yRenderer = am5xy.AxisRendererY.new(root, {
+            minGridDistance: 10,
+            minorGridEnabled: true
+        });
+
+        yRenderer.grid.template.set("location", 1);
+        yRenderer.labels.template.setAll({
+            fontSize: 12
+        });
+
+
+        var yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
+            maxDeviation: 0,
+            categoryField: "bedNo",
+            renderer: yRenderer,
+            tooltip: am5.Tooltip.new(root, { themeTags: ["axis"] })
+        }));
+
+        var scrollbar = am5.Scrollbar.new(root, {
+            orientation: "vertical"
+        });
+        yAxis.set("scrollbar", scrollbar);
+
+        var xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+            maxDeviation: 0,
+            min: 0,
+            max: 100,
+            numberFormatter: am5.NumberFormatter.new(root, {
+                "numberFormat": "##"
+            }),
+            // extraMax: 0.1,
+            renderer: am5xy.AxisRendererX.new(root, {
+                strokeOpacity: 0.1,
+                minGridDistance: 80
+
+            })
+        }));
+
+
+        // Add series
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
+        var series = chart.series.push(am5xy.ColumnSeries.new(root, {
+            name: "Series 1",
+            xAxis: xAxis,
+            yAxis: yAxis,
+            valueXField: "occupied",
+            categoryYField: "bedNo",
+            tooltip: am5.Tooltip.new(root, {
+                pointerOrientation: "left",
+                labelText: "{valueX}%"
+            })
+        }));
+
+
+        // Rounded corners for columns
+        series.columns.template.setAll({
+            cornerRadiusTR: 5,
+            cornerRadiusBR: 5,
+            strokeOpacity: 0
+        });
+
+        // Make each column to be of a different color
+        series.columns.template.adapters.add("fill", function (fill, target) {
+            return chart.get("colors").getIndex(series.columns.indexOf(target));
+        });
+
+        series.columns.template.adapters.add("stroke", function (stroke, target) {
+            return chart.get("colors").getIndex(series.columns.indexOf(target));
+        });
+
+        series.bullets.push(function () {
+            return am5.Bullet.new(root, {
+                locationX: 1,
+                locationY: 0.5,
+                sprite: am5.Label.new(root, {
+                    text: "{valueX}%",
+                    fill: root.interfaceColors.get("alternativeText"),
+                    centerX: am5.p100,
+                    centerY: am5.p50,
+                    populateText: true
+                })
+            });
+        });
+
+
+        // Set data
+        var data = [
+            {
+                "network": "Facebook",
+                "value": 2255250000
+            },
+            {
+                "network": "Google+",
+                "value": 430000000
+            },
+            {
+                "network": "Instagram",
+                "value": 1000000000
+            },
+            {
+                "network": "Pinterest",
+                "value": 246500000
+            },
+            {
+                "network": "Reddit",
+                "value": 355000000
+            },
+            {
+                "network": "TikTok",
+                "value": 500000000
+            },
+            {
+                "network": "Tumblr",
+                "value": 624000000
+            },
+            {
+                "network": "Twitter",
+                "value": 329500000
+            },
+            {
+                "network": "WeChat",
+                "value": 1000000000
+            },
+            {
+                "network": "Weibo",
+                "value": 431000000
+            },
+            {
+                "network": "Whatsapp",
+                "value": 1433333333
+            },
+            {
+                "network": "YouTube",
+                "value": 1900000000
+            }
+        ];
+
+        yAxis.data.setAll(transformedData);
+        series.data.setAll(transformedData);
+        sortCategoryAxis();
+
+        // Get series item by category
+        function getSeriesItem(category) {
+            for (var i = 0; i < series.dataItems.length; i++) {
+                var dataItem = series.dataItems[i];
+                if (dataItem.get("categoryY") == category) {
+                    return dataItem;
+                }
+            }
+        }
+
+        chart.set("cursor", am5xy.XYCursor.new(root, {
+            behavior: "none",
+            xAxis: xAxis,
+            yAxis: yAxis
+        }));
+
+
+        // Axis sorting
+        function sortCategoryAxis() {
+
+            // Sort by value
+            series.dataItems.sort(function (x, y) {
+                return x.get("valueX") - y.get("valueX"); // descending
+                //return y.get("valueY") - x.get("valueX"); // ascending
+            })
+
+            // Go through each axis item
+            am5.array.each(yAxis.dataItems, function (dataItem) {
+                // get corresponding series item
+                var seriesDataItem = getSeriesItem(dataItem.get("category"));
+
+                if (seriesDataItem) {
+                    // get index of series data item
+                    var index = series.dataItems.indexOf(seriesDataItem);
+                    // calculate delta position
+                    var deltaPosition = (index - dataItem.get("index", 0)) / series.dataItems.length;
+                    // set index to be the same as series data item index
+                    dataItem.set("index", index);
+                    // set deltaPosition instanlty
+                    dataItem.set("deltaPosition", -deltaPosition);
+                    // animate delta position to 0
+                    dataItem.animate({
+                        key: "deltaPosition",
+                        to: 0,
+                        duration: 1000,
+                        easing: am5.ease.out(am5.ease.cubic)
+                    })
+                }
+            });
+
+            // Sort axis items by index.
+            // This changes the order instantly, but as deltaPosition is set,
+            // they keep in the same places and then animate to true positions.
+            yAxis.dataItems.sort(function (x, y) {
+                return x.get("index") - y.get("index");
+            });
+        }
+
+
+        // update data with random values each 1.5 sec
+        // Lưu trữ giá trị ban đầu của mỗi bar
+        const originalValues = {};
+
+        // Lưu giá trị ban đầu cho mỗi bar
+        am5.array.each(series.dataItems, function (dataItem) {
+            originalValues[dataItem.get("categoryY")] = dataItem.get("valueX");
+        });
+
+        let animationTime = 0;
+        const totalAnimationTime = 10000; // 10 seconds
+
+        const intervalId = setInterval(function () {
+            if (animationTime < totalAnimationTime) {
+                updateData();
+                animationTime += 1000;
+            } else {
+                clearInterval(intervalId);
+                resetToOriginalValues(); // Reset về giá trị ban đầu khi kết thúc
+            }
+        }, 1000);
+
+        function updateData() {
+            am5.array.each(series.dataItems, function (dataItem) {
+                const currentValue = dataItem.get("valueX");
+                if (currentValue !== 0) {
+                    const value = Math.min(100, Math.max(0, currentValue + Math.random() * 10 - 5));
+
+                    dataItem.set("valueX", value);
+                    dataItem.animate({
+                        key: "valueXWorking",
+                        to: value,
+                        duration: 600,
+                        easing: am5.ease.out(am5.ease.cubic)
+                    });
+                }
+            });
+
+            sortCategoryAxis();
+        }
+
+        function resetToOriginalValues() {
+            am5.array.each(series.dataItems, function (dataItem) {
+                const category = dataItem.get("categoryY");
+                const originalValue = originalValues[category];
+
+                dataItem.set("valueX", originalValue);
+                dataItem.animate({
+                    key: "valueXWorking",
+                    to: originalValue,
+                    duration: 600,
+                    easing: am5.ease.out(am5.ease.cubic)
+                });
+            });
+
+            sortCategoryAxis();
+        }
+
+        // Make stuff animate on load
+        // https://www.amcharts.com/docs/v5/concepts/animations/
+        series.appear(1000);
+        chart.appear(1000, 100);
+
+    }); // end am5.ready()
+</script>
+
+</html>
